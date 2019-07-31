@@ -20,8 +20,8 @@ import java.util.List;
 public class BLEDevice extends BaseDevice {
     public byte[] scanRecord;
 
-    public BLEDevice(boolean isBLE, BluetoothDevice device) {
-        super(isBLE, device);
+    public BLEDevice(BluetoothDevice device) {
+        super(true, device);
     }
 
     @Override

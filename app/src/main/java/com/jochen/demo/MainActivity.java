@@ -14,6 +14,7 @@ import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
 import com.jochen.bluetoothmanager.spp.SPPManager;
+import com.jochen.bluetoothmanager.utils.BluetoothUtils;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 
 import java.util.ArrayList;
@@ -26,9 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSIONS_CODE = 0x1000;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        BluetoothUtils.init(this);
         SPPManager.getInstance().init(this);
         BLEManager.getInstance().init(this);
         findViewById(R.id.btn_ble_scan).setOnClickListener(new View.OnClickListener() {
@@ -86,10 +88,67 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        checkPermissions(getManifestPermissions());
+        findViewById(R.id.btn_spp_bond).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.createBond(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"), new BluetoothUtils.BondCallback() {
+                    @Override
+                    public void onBondState(int state) {
+                        LogUtils.i(TAG, "onBondState " + state);
+                    }
+                });
+            }
+        });
 
-        SPPDevice sppDevice = (SPPDevice) SPPManager.getInstance().getDevice("66:55:44:33:22:11");
-        sppDevice.connect();
+        findViewById(R.id.btn_spp_unbond).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.removeBond(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"), new BluetoothUtils.BondCallback() {
+                    @Override
+                    public void onBondState(int state) {
+                        LogUtils.i(TAG, "onBondState " + state);
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.btn_a2dp_connect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.connectA2DP(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"));
+            }
+        });
+
+        findViewById(R.id.btn_a2dp_disconnect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.disconnectA2DP(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"));
+            }
+        });
+
+        findViewById(R.id.btn_hfp_connect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.connectHFP(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"));
+            }
+        });
+
+        findViewById(R.id.btn_hfp_disconnect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BluetoothUtils.disconnectHFP(MainActivity.this, BluetoothUtils.getBluetoothAdapter().getRemoteDevice("66:55:44:33:22:11"));
+            }
+        });
+
+        findViewById(R.id.btn_spp_connect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SPPDevice sppDevice = (SPPDevice) SPPManager.getInstance().getDevice("66:55:44:33:22:11");
+                sppDevice.connect();
+            }
+        });
+
+        checkPermissions(getManifestPermissions());
     }
 
     /**

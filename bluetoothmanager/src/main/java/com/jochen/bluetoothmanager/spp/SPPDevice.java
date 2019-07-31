@@ -18,8 +18,8 @@ import java.io.OutputStream;
 public class SPPDevice extends BaseDevice {
     public Bundle extras;
 
-    public SPPDevice(boolean isBLE, BluetoothDevice device) {
-        super(isBLE, device);
+    public SPPDevice(BluetoothDevice device) {
+        super(false, device);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class SPPDevice extends BaseDevice {
 
     @Override
     public String toString() {
-        return "SPPDevice Name: " + device.getName() + " mac: " + device.getAddress();
+        return "[" + device.getName() + "] mac: " + device.getAddress() + " BondState: " + device.getBondState();
     }
 
     /***********************************************************************************************
@@ -69,7 +69,7 @@ public class SPPDevice extends BaseDevice {
      * @param socket The BluetoothSocket on which the connection was made
      * @param device The BluetoothDevice that has been connected
      */
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType) {
+    private synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType) {
         LogUtils.i("[" + device.getName() + "] connected, Socket Type:" + socketType);
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -91,7 +91,7 @@ public class SPPDevice extends BaseDevice {
     /**
      * 清空连接
      */
-    public synchronized void clearConnection() {
+    private synchronized void clearConnection() {
         // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {
             mConnectThread.cancel();
@@ -185,7 +185,7 @@ public class SPPDevice extends BaseDevice {
             connected(mmSocket, mmDevice, mSocketType);
         }
 
-        public void cancel() {
+        void cancel() {
             try {
                 if (mmSocket != null) {
                     mmSocket.close();
@@ -205,7 +205,7 @@ public class SPPDevice extends BaseDevice {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        public ConnectedThread(BluetoothSocket socket, String socketType) {
+        ConnectedThread(BluetoothSocket socket, String socketType) {
             LogUtils.d("[" + device.getName() + "] create ConnectedThread: " + socketType);
             setConnectState(ConnectState.STATE_CONNECTED);
             mmSocket = socket;
@@ -256,7 +256,7 @@ public class SPPDevice extends BaseDevice {
          *
          * @param buffer The bytes to write
          */
-        public void write(byte[] buffer) {
+        void write(byte[] buffer) {
             try {
                 LogUtils.d("[" + device.getName() + "] 发送 长度: " + buffer.length + " 数据: " + ProtocolUtils.bytesToHexStr(buffer));
                 mmOutStream.write(buffer);
@@ -265,7 +265,7 @@ public class SPPDevice extends BaseDevice {
             }
         }
 
-        public void cancel() {
+        void cancel() {
             try {
                 if (mmSocket != null) {
                     mmSocket.close();

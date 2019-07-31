@@ -38,7 +38,7 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
 
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        BLEDevice bleDevice = new BLEDevice(true, device);
+        BLEDevice bleDevice = new BLEDevice(device);
         bleDevice.rssi = rssi;
         bleDevice.scanRecord = scanRecord;
         onScanDevice(bleDevice);
@@ -49,7 +49,7 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
         if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (device != null) {
-                SPPDevice sppDevice = new SPPDevice(false, device);
+                SPPDevice sppDevice = new SPPDevice(device);
                 Bundle extras = intent.getExtras();
                 if (extras != null) {
                     sppDevice.extras = extras;

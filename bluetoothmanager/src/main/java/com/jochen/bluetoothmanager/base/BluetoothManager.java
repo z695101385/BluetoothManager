@@ -67,11 +67,11 @@ public abstract class BluetoothManager {
         if (device == null) {
             return null;
         }
-        BaseDevice baseDevice = null;
+        BaseDevice baseDevice;
         if (isBLE) {
-            baseDevice = new BLEDevice(true, device);
+            baseDevice = new BLEDevice(device);
         } else {
-            baseDevice = new SPPDevice(false, device);
+            baseDevice = new SPPDevice(device);
         }
         return baseDevice;
     }

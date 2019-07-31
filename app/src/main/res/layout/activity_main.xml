@@ -18,4 +18,47 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SPP SCAN" />
+
+    <Button
+        android:id="@+id/btn_spp_bond"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SPP BOND" />
+
+    <Button
+        android:id="@+id/btn_spp_unbond"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SPP UNBOND" />
+
+    <Button
+        android:id="@+id/btn_a2dp_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="A2DP CONNECT" />
+
+    <Button
+        android:id="@+id/btn_a2dp_disconnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="A2DP DISCONNECT" />
+
+    <Button
+        android:id="@+id/btn_hfp_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HFP CONNECT" />
+
+    <Button
+        android:id="@+id/btn_hfp_disconnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="HFP DISCONNECT" />
+
+    <Button
+        android:id="@+id/btn_spp_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SPP CONNECT" />
+
 </LinearLayout>
