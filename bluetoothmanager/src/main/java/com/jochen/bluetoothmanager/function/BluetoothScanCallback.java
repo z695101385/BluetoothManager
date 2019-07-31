@@ -11,6 +11,9 @@ import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.ble.BLEDevice;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 文件名：BluetoothScanCallback
  * 描述：蓝牙搜索回调
@@ -19,11 +22,16 @@ import com.jochen.bluetoothmanager.spp.SPPDevice;
  */
 public abstract class BluetoothScanCallback extends BroadcastReceiver implements BluetoothAdapter.LeScanCallback {
     private static final String TAG = "BluetoothScanCallback";
+    private Map<BluetoothDevice, BaseDevice> devices = new HashMap<>();
     //毫秒，若搜索时长小于等于0，则无超时
     private int scanTimeOut;
 
     public BluetoothScanCallback(int scanTimeOut) {
         this.scanTimeOut = scanTimeOut;
+    }
+
+    public void reset() {
+        devices.clear();
     }
 
     public int getScanTimeOut() {
@@ -32,16 +40,29 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
 
     public abstract void onScanDevice(BaseDevice device);
 
+    protected void onRefreshDevice(BaseDevice device) {
+    }
+
     public abstract void onScanTimeout();
 
     public abstract void onScanCancel();
 
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-        BLEDevice bleDevice = new BLEDevice(device);
-        bleDevice.rssi = rssi;
-        bleDevice.scanRecord = scanRecord;
-        onScanDevice(bleDevice);
+        if (devices.containsKey(device)) {
+            BLEDevice bleDevice = (BLEDevice) devices.get(device);
+            if (bleDevice != null) {
+                bleDevice.rssi = rssi;
+                bleDevice.scanRecord = scanRecord;
+                onRefreshDevice(bleDevice);
+            }
+        } else {
+            BLEDevice bleDevice = new BLEDevice(device);
+            bleDevice.rssi = rssi;
+            bleDevice.scanRecord = scanRecord;
+            devices.put(device, bleDevice);
+            onScanDevice(bleDevice);
+        }
     }
 
     @Override
@@ -49,13 +70,26 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
         if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (device != null) {
-                SPPDevice sppDevice = new SPPDevice(device);
-                Bundle extras = intent.getExtras();
-                if (extras != null) {
-                    sppDevice.extras = extras;
-                    sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
+                if (devices.containsKey(device)) {
+                    SPPDevice sppDevice = (SPPDevice) devices.get(device);
+                    if (sppDevice != null) {
+                        Bundle extras = intent.getExtras();
+                        if (extras != null) {
+                            sppDevice.extras = extras;
+                            sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
+                        }
+                        onRefreshDevice(sppDevice);
+                    }
+                } else {
+                    SPPDevice sppDevice = new SPPDevice(device);
+                    Bundle extras = intent.getExtras();
+                    if (extras != null) {
+                        sppDevice.extras = extras;
+                        sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
+                    }
+                    devices.put(device, sppDevice);
+                    onScanDevice(sppDevice);
                 }
-                onScanDevice(sppDevice);
             }
         }
     }

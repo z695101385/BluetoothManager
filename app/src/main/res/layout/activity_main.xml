@@ -14,22 +14,34 @@
         android:text="BLE SCAN" />
 
     <Button
+        android:id="@+id/btn_ble_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BLE CONNECT" />
+
+    <Button
         android:id="@+id/btn_spp_scan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="SPP SCAN" />
 
     <Button
+        android:id="@+id/btn_spp_connect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SPP CONNECT" />
+
+    <Button
         android:id="@+id/btn_spp_bond"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SPP BOND" />
+        android:text="BOND" />
 
     <Button
         android:id="@+id/btn_spp_unbond"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="SPP UNBOND" />
+        android:text="UNBOND" />
 
     <Button
         android:id="@+id/btn_a2dp_connect"
@@ -54,11 +66,4 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="HFP DISCONNECT" />
-
-    <Button
-        android:id="@+id/btn_spp_connect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="SPP CONNECT" />
-
 </LinearLayout>

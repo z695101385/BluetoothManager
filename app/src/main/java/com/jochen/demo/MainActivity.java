@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.jochen.bluetoothmanager.base.BaseDevice;
+import com.jochen.bluetoothmanager.ble.BLEDevice;
 import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
@@ -43,10 +44,15 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onScanDevice(BaseDevice device) {
                             LogUtils.i(TAG, "BLEManager onScanDevice: " + device.toString());
-                            if (device.device.getAddress().equalsIgnoreCase("2C:4D:79:17:71:14")) {
-                                BLEManager.getInstance().cancelScan();
-                                device.connect();
-                            }
+//                            if (device.device.getAddress().equalsIgnoreCase("2C:4D:79:17:71:14")) {
+//                                BLEManager.getInstance().cancelScan();
+//                                device.connect();
+//                            }
+                        }
+
+                        @Override
+                        protected void onRefreshDevice(BaseDevice device) {
+                            LogUtils.i(TAG, "BLEManager onRefreshDevice: " + device.toString());
                         }
 
                         @Override
@@ -72,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onScanDevice(BaseDevice device) {
                             LogUtils.i(TAG, "SPPManager onScanDevice: " + device.toString());
+                        }
+
+                        @Override
+                        protected void onRefreshDevice(BaseDevice device) {
+                            LogUtils.i(TAG, "SPPManager onRefreshDevice: " + device.toString());
                         }
 
                         @Override
@@ -145,6 +156,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 SPPDevice sppDevice = (SPPDevice) SPPManager.getInstance().getDevice("66:55:44:33:22:11");
                 sppDevice.connect();
+            }
+        });
+
+        findViewById(R.id.btn_ble_connect).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BLEDevice bleDevice = (BLEDevice) BLEManager.getInstance().getDevice("2C:4D:79:17:71:14");
+                bleDevice.connect();
             }
         });
 

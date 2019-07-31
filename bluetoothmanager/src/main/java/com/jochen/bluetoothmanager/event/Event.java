@@ -2,8 +2,6 @@ package com.jochen.bluetoothmanager.event;
 
 /**
  * 文件名：Event
- * 描述：EventBus Event基类只有继承该类才能通过重写BaseActivity的
- * public void onEvent(Event event)方法监听到
  *
  * 粘性事件允许Event发送在注册监听Event之前
  * 监听粘性事件需要在函数前加上注解@Subscribe(sticky = true)

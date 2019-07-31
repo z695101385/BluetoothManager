@@ -100,6 +100,7 @@ public abstract class BluetoothManager {
         if (null == bluetoothScanCallback) {
             bluetoothScanCallback = callback;
             LogUtils.d("[" + TAG() + "] 搜索开始");
+            callback.reset();
             boolean result = startScanFunction(callback);
             if (result) {
                 //开启成功，开启超时定时器
