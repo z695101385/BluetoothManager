@@ -10,7 +10,6 @@ import android.os.Bundle;
 import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.ble.BLEDevice;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
-import com.jochen.bluetoothmanager.utils.LogUtils;
 
 /**
  * 文件名：BluetoothScanCallback

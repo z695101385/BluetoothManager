@@ -12,6 +12,7 @@ import android.view.View;
 import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
+import com.jochen.bluetoothmanager.spp.SPPDevice;
 import com.jochen.bluetoothmanager.spp.SPPManager;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 
@@ -40,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onScanDevice(BaseDevice device) {
                             LogUtils.i(TAG, "BLEManager onScanDevice: " + device.toString());
+                            if (device.device.getAddress().equalsIgnoreCase("2C:4D:79:17:71:14")) {
+                                BLEManager.getInstance().cancelScan();
+                                device.connect();
+                            }
                         }
 
                         @Override
@@ -82,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         checkPermissions(getManifestPermissions());
+
+        SPPDevice sppDevice = (SPPDevice) SPPManager.getInstance().getDevice("66:55:44:33:22:11");
+        sppDevice.connect();
     }
 
     /**
