@@ -25,12 +25,19 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
     private Map<BluetoothDevice, BaseDevice> devices = new HashMap<>();
     //毫秒，若搜索时长小于等于0，则无超时
     private int scanTimeOut;
+    private boolean isScanning = true;
 
     public BluetoothScanCallback(int scanTimeOut) {
         this.scanTimeOut = scanTimeOut;
     }
 
     public void reset() {
+        isScanning = true;
+        devices.clear();
+    }
+
+    public void stop() {
+        isScanning = false;
         devices.clear();
     }
 
@@ -54,14 +61,18 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
             if (bleDevice != null) {
                 bleDevice.rssi = rssi;
                 bleDevice.scanRecord = scanRecord;
-                onRefreshDevice(bleDevice);
+                if (isScanning) {
+                    onRefreshDevice(bleDevice);
+                }
             }
         } else {
             BLEDevice bleDevice = new BLEDevice(device);
             bleDevice.rssi = rssi;
             bleDevice.scanRecord = scanRecord;
             devices.put(device, bleDevice);
-            onScanDevice(bleDevice);
+            if (isScanning) {
+                onScanDevice(bleDevice);
+            }
         }
     }
 
@@ -78,7 +89,9 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
                             sppDevice.extras = extras;
                             sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
                         }
-                        onRefreshDevice(sppDevice);
+                        if (isScanning) {
+                            onRefreshDevice(sppDevice);
+                        }
                     }
                 } else {
                     SPPDevice sppDevice = new SPPDevice(device);
@@ -88,7 +101,9 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
                         sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
                     }
                     devices.put(device, sppDevice);
-                    onScanDevice(sppDevice);
+                    if (isScanning) {
+                        onScanDevice(sppDevice);
+                    }
                 }
             }
         }

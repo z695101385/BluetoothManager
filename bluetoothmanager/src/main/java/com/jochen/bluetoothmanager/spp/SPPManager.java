@@ -7,6 +7,16 @@ import com.jochen.bluetoothmanager.base.BluetoothManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
 import com.jochen.bluetoothmanager.utils.BluetoothUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * 文件名：SPPManager
+ * 描述：SPP管理类
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/1
+ */
 public class SPPManager extends BluetoothManager {
     @Override
     protected boolean startScanFunction(BluetoothScanCallback callback) {
@@ -19,6 +29,22 @@ public class SPPManager extends BluetoothManager {
     protected void stopScanFunction(BluetoothScanCallback callback) {
         mContext.unregisterReceiver(callback);
         BluetoothUtils.getBluetoothAdapter().cancelDiscovery();
+    }
+
+    /**
+     * 获取已绑定设备
+     *
+     * @return 绑定设备数组
+     */
+    public List<SPPDevice> getBondedDevices() {
+        List<SPPDevice> bondedDevices = new ArrayList<>();
+        Set<BluetoothDevice> deviceSet = BluetoothUtils.getBondedDevices();
+        if (deviceSet != null) {
+            for (BluetoothDevice device : deviceSet) {
+                bondedDevices.add(new SPPDevice(device));
+            }
+        }
+        return bondedDevices;
     }
 
     /***********************************************************************************************

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.jochen.demo.ui.MainActivity"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:singleLine="true"
+            android:gravity="center_vertical"
+            android:textColor="#000000"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btn_opera"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+        <TextView
+            android:id="@+id/tv_mac"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_connect_state"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_spp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_bond"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="绑定" />
+
+            <Button
+                android:id="@+id/btn_unbond"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="解绑" />
+
+            <TextView
+                android:id="@+id/tv_bond_state"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_connect_a2dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="连A2DP" />
+
+            <Button
+                android:id="@+id/btn_disconnect_a2dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="断A2DP" />
+
+            <Button
+                android:id="@+id/btn_connect_hfp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="连HFP" />
+
+            <Button
+                android:id="@+id/btn_disconnect_hfp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="断HFP" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_ble"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <EditText
+            android:id="@+id/et_mtu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/btn_mtu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="设置MTU" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_command"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:maxLines="1000"
+        android:scrollbars="vertical"
+        android:singleLine="false" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_command"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="发送" />
+    </LinearLayout>
+
+</LinearLayout>

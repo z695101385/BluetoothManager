@@ -27,17 +27,13 @@ import java.util.TimerTask;
  * 创建时间：2019/7/26
  */
 public abstract class BluetoothManager {
-    static {
-        EventBus.builder().installDefaultEventBus();
-    }
-
     protected boolean isBLE = false;
     protected Context mContext;
 
+    public HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
     private BluetoothScanCallback bluetoothScanCallback = null;
     private Timer mScanTimer = new Timer();
     private TimerTask mScanTimerTask;
-    private HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
 
     public void init(Context context) {
         deInit();
@@ -47,9 +43,9 @@ public abstract class BluetoothManager {
 
     public void deInit() {
         if (mContext != null) {
-            EventBus.getDefault().unregister(this);
             mContext = null;
         }
+        EventBus.getDefault().unregister(this);
     }
 
     public Context getContext() {
@@ -63,11 +59,14 @@ public abstract class BluetoothManager {
      * @return
      */
     public BaseDevice getDevice(String address) {
+        BaseDevice baseDevice = connectedDevices.get(address);
+        if (baseDevice != null) {
+            return baseDevice;
+        }
         BluetoothDevice device = BluetoothUtils.getBluetoothAdapter().getRemoteDevice(address);
         if (device == null) {
             return null;
         }
-        BaseDevice baseDevice;
         if (isBLE) {
             baseDevice = new BLEDevice(device);
         } else {
@@ -120,6 +119,8 @@ public abstract class BluetoothManager {
                 }
             } else {
                 // 开启失败
+                LogUtils.d("[" + TAG() + "] 开启搜索失败");
+                bluetoothScanCallback.onScanCancel();
                 bluetoothScanCallback = null;
             }
             return result;
@@ -138,6 +139,7 @@ public abstract class BluetoothManager {
             mScanTimerTask = null;
         }
         if (null != bluetoothScanCallback) {
+            bluetoothScanCallback.stop();
             stopScanFunction(bluetoothScanCallback);
             bluetoothScanCallback = null;
         }
@@ -175,7 +177,7 @@ public abstract class BluetoothManager {
                             connectedDevices.remove(device.device.getAddress());
                             LogUtils.i("[" + TAG() + "] connectedDevices " + connectedDevices.size());
                             break;
-                        case ConnectState.STATE_CONNECTED:
+                        case ConnectState.STATE_CONNECTING:
                             connectedDevices.put(device.device.getAddress(), device);
                             LogUtils.i("[" + TAG() + "] connectedDevices " + connectedDevices.size());
                             break;

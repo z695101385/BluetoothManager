@@ -1,6 +1,7 @@
 package com.jochen.bluetoothmanager.base;
 
 import android.bluetooth.BluetoothDevice;
+import android.os.Parcelable;
 
 import com.jochen.bluetoothmanager.event.Event;
 import com.jochen.bluetoothmanager.event.EventCode;
@@ -40,8 +41,8 @@ public abstract class BaseDevice {
     protected void setConnectState(int state) {
         if (state != connectionState) {
             LogUtils.i("[" + device.getName() + "] 连接状态 " + connectionState + " -> " + state);
-            EventBus.getDefault().post(new Event<>(EventCode.ConnectionStateChangedCode, this));
             connectionState = state;
+            EventBus.getDefault().post(new Event<>(EventCode.ConnectionStateChangedCode, this));
             switch (state) {
                 case ConnectState.STATE_DISCONNECTED:
                     break;
