@@ -1,7 +1,7 @@
 # BluetoothManager
-Android BLE、SPP的工具类
-Manager: BLEManager、SPPManager BLE、SPP管理类
-Device: BLEDevice、SPPDevice 连接通信实现类，若不需要搜索操作可只使用此类
+Android BLE、SPP的工具类  
+Manager: BLEManager、SPPManager BLE、SPP管理类  
+Device: BLEDevice、SPPDevice 连接通信实现类，若不需要搜索操作可只使用此类  
 BluetoothUtils: 提供基础蓝牙操作、绑定操作、A2DP、HFP的相关操作
 
 ## 初始化
@@ -13,8 +13,8 @@ BLEManager.getInstance().init(this);
 ```
 
 ## Manager
-Manger主要负责设备搜索与管理
-BLEManager、SPPManager都继承于BluetoothManager
+Manger主要负责设备搜索与管理  
+BLEManager、SPPManager都继承于BluetoothManager  
 使用BLEManager搜索到的设备就是BLE设备，SPPManager搜索到的设备就是传统蓝牙设备
 
 ### BluetoothManager的属性与方法：
@@ -66,8 +66,8 @@ BLEManager.getInstance().cancelScan();
 ```
 
 ## Device
-Device负责建立链路以及数据通信（可以不依靠Manager单独使用）
-BLEDevice、SPPDevice都继承于BaseDevice
+Device负责建立链路以及数据通信（可以不依靠Manager单独使用）  
+BLEDevice、SPPDevice都继承于BaseDevice  
 只需要构造方法中传入系统BluetoothDevice作为参数
 
 ### BaseDevice中的属性与方法:
