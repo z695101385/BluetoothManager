@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.ble.BLEDevice;
-import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.event.Event;
 import com.jochen.bluetoothmanager.event.EventCode;
 import com.jochen.bluetoothmanager.function.ConnectState;
@@ -28,6 +27,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+/**
+ * 文件名：DeviceActivity
+ * 描述：设备管理界面（SPP、BLE）
+ * 功能：
+ * 1、连接控制、数据通信
+ * 2、SPP：绑定、解绑、A2DP与HFP链路控制
+ * 3、BLE：设置MTU
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/1
+ */
 public class DeviceActivity extends AppCompatActivity {
     private static final String TAG = "DeviceActivity";
     public static BaseDevice device;
@@ -55,6 +64,7 @@ public class DeviceActivity extends AppCompatActivity {
     private EditText mCommandEditText;
     private Button mSendButton;
 
+    // 设备发送数据回调
     private ReceiveDataCallback mReceiveDataCallback = new ReceiveDataCallback() {
         @Override
         public void onReceive(final byte[] data) {
@@ -89,12 +99,15 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        // 通用
         mDeviceNameTextView = findViewById(R.id.tv_name);
         mOperaButton = findViewById(R.id.btn_opera);
-
         mDeviceMacTextView = findViewById(R.id.tv_mac);
         mConnectStateTextView = findViewById(R.id.tv_connect_state);
-
+        mCommandTextView = findViewById(R.id.tv_command);
+        mCommandEditText = findViewById(R.id.et_command);
+        mSendButton = findViewById(R.id.btn_send);
+        // SPP
         mSPPLinearLayout = findViewById(R.id.ll_spp);
         mBondButton = findViewById(R.id.btn_bond);
         mUnBondButton = findViewById(R.id.btn_unbond);
@@ -103,84 +116,14 @@ public class DeviceActivity extends AppCompatActivity {
         mDisconnectA2DPButton = findViewById(R.id.btn_disconnect_a2dp);
         mConnectHFPButton = findViewById(R.id.btn_connect_hfp);
         mDisconnectHFPButton = findViewById(R.id.btn_disconnect_hfp);
-
+        // BLE
         mBLELinearLayout = findViewById(R.id.ll_ble);
         mMTUEditText = findViewById(R.id.et_mtu);
         mMTUButton = findViewById(R.id.btn_mtu);
 
-        mCommandTextView = findViewById(R.id.tv_command);
-        mCommandEditText = findViewById(R.id.et_command);
-        mSendButton = findViewById(R.id.btn_send);
 
         mDeviceNameTextView.setText(device.device.getName());
         mDeviceMacTextView.setText(device.device.getAddress());
-
-        if (device.isBLE) {
-            mSPPLinearLayout.setVisibility(View.GONE);
-            mBLELinearLayout.setVisibility(View.VISIBLE);
-
-            mMTUButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BLEDevice bleDevice = (BLEDevice) device;
-                    int mtu = Integer.parseInt(mMTUEditText.getText().toString());
-                    bleDevice.setMTU(mtu);
-                }
-            });
-        } else {
-            mSPPLinearLayout.setVisibility(View.VISIBLE);
-            mBLELinearLayout.setVisibility(View.GONE);
-            mBondButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.createBond(DeviceActivity.this, device.device, new BluetoothUtils.BondCallback() {
-                        @Override
-                        public void onBondState(int state) {
-                            LogUtils.i(TAG, "bond state " + state);
-                            refreshUI();
-                        }
-                    });
-                }
-            });
-            mUnBondButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.removeBond(DeviceActivity.this, device.device, new BluetoothUtils.BondCallback() {
-                        @Override
-                        public void onBondState(int state) {
-                            LogUtils.i(TAG, "bond state " + state);
-                            refreshUI();
-                        }
-                    });
-                }
-            });
-            mConnectA2DPButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.connectA2DP(DeviceActivity.this, device.device);
-                }
-            });
-            mDisconnectA2DPButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.disconnectA2DP(DeviceActivity.this, device.device);
-                }
-            });
-            mConnectHFPButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.connectHFP(DeviceActivity.this, device.device);
-                }
-            });
-            mDisconnectHFPButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    BluetoothUtils.disconnectHFP(DeviceActivity.this, device.device);
-                }
-            });
-        }
-
-
         mCommandTextView.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         mOperaButton.setOnClickListener(new View.OnClickListener() {
@@ -196,9 +139,86 @@ public class DeviceActivity extends AppCompatActivity {
                 send();
             }
         });
+
+        if (device.isBLE) {
+            // BLE设备界面
+            mSPPLinearLayout.setVisibility(View.GONE);
+            mBLELinearLayout.setVisibility(View.VISIBLE);
+
+            mMTUButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BLEDevice bleDevice = (BLEDevice) device;
+                    int mtu = Integer.parseInt(mMTUEditText.getText().toString());
+                    bleDevice.setMTU(mtu);
+                }
+            });
+        } else {
+            // SPP设备界面
+            mSPPLinearLayout.setVisibility(View.VISIBLE);
+            mBLELinearLayout.setVisibility(View.GONE);
+
+            mBondButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.createBond(DeviceActivity.this, device.device, new BluetoothUtils.BondCallback() {
+                        @Override
+                        public void onBondState(int state) {
+                            LogUtils.i(TAG, "bond state " + state);
+                            refreshUI();
+                        }
+                    });
+                }
+            });
+
+            mUnBondButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.removeBond(DeviceActivity.this, device.device, new BluetoothUtils.BondCallback() {
+                        @Override
+                        public void onBondState(int state) {
+                            LogUtils.i(TAG, "bond state " + state);
+                            refreshUI();
+                        }
+                    });
+                }
+            });
+
+            mConnectA2DPButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.connectA2DP(DeviceActivity.this, device.device);
+                }
+            });
+
+            mDisconnectA2DPButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.disconnectA2DP(DeviceActivity.this, device.device);
+                }
+            });
+
+            mConnectHFPButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.connectHFP(DeviceActivity.this, device.device);
+                }
+            });
+
+            mDisconnectHFPButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BluetoothUtils.disconnectHFP(DeviceActivity.this, device.device);
+                }
+            });
+        }
+
         refreshUI();
     }
 
+    /**
+     * 刷新UI
+     */
     private void refreshUI() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             mConnectStateTextView.setText(ConnectState.toString(device.connectionState));
@@ -207,9 +227,7 @@ public class DeviceActivity extends AppCompatActivity {
             } else {
                 mOperaButton.setText("断开");
             }
-            if (device.isBLE) {
-
-            } else {
+            if (!device.isBLE) {
                 mBondStateTextView.setText(getBondString(device.device));
             }
         } else {
@@ -222,6 +240,9 @@ public class DeviceActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 连接、断开设备
+     */
     private void opera() {
         if (device.connectionState == ConnectState.STATE_DISCONNECTED) {
             //连接
@@ -232,14 +253,23 @@ public class DeviceActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 发送数据
+     */
     private void send() {
-        String command = "7f80808094828102848c334532323732384242453130868100d739"; //mCommandEditText.getText().toString();
+        String command = mCommandEditText.getText().toString();
         mCommandEditText.getText().clear();
         byte[] data = ProtocolUtils.hexStrToBytes(command);
         addMessage(true, command);
         device.write(data);
     }
 
+    /**
+     * 向TextView添加消息
+     *
+     * @param isSend true 发送 or false 接收
+     * @param message 16进制数据
+     */
     private void addMessage(boolean isSend, String message) {
         String command = mCommandTextView.getText().toString();
         if (isSend) {
@@ -262,6 +292,12 @@ public class DeviceActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 获取绑定状态字符串
+     *
+     * @param device BluetoothDevice
+     * @return String
+     */
     private String getBondString(BluetoothDevice device) {
         switch (device.getBondState()) {
             case BluetoothDevice.BOND_NONE:

@@ -17,6 +17,14 @@ import com.jochen.bluetoothmanager.utils.ProtocolUtils;
 
 import java.util.List;
 
+/**
+ * 文件名：BLEDevice
+ * 描述：封装了BLE链路的连接、通信方法
+ * 构造只需要传入系统的BluetoothDevice模型
+ * BLEDevice bleDevice = new BLEDevice(device);
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/2
+ */
 public class BLEDevice extends BaseDevice {
     public byte[] scanRecord;
 
@@ -40,6 +48,11 @@ public class BLEDevice extends BaseDevice {
     public void disconnect() {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
+            // 若
+            mBluetoothGatt.close();
+            mBluetoothGatt = null;
+            setConnectState(ConnectState.STATE_DISCONNECTED);
+            clearTxRxCharacteristic();
         }
     }
 
@@ -60,9 +73,9 @@ public class BLEDevice extends BaseDevice {
     /***********************************************************************************************
      * BLE 连接实现
      **********************************************************************************************/
-    // write characteristic
+    // 写特征
     private static BluetoothGattCharacteristic mTxCharacteristic = null;
-    // notify characteristic
+    // 读特征
     private static BluetoothGattCharacteristic mRxCharacteristic = null;
     private BluetoothGatt mBluetoothGatt;
 
@@ -87,16 +100,16 @@ public class BLEDevice extends BaseDevice {
                 boolean RxCharacteristicReady = false;
                 boolean TxCharacteristicReady = false;
                 for (BluetoothGattService bluetoothGattService : bluetoothGattServices) {
-                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxServiceUUID())) {
+                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxServiceUUID(device))) {
                         for (BluetoothGattCharacteristic bluetoothGattCharacteristic : bluetoothGattService.getCharacteristics()) {
-                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxCharacteristicUUID())) {
+                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxCharacteristicUUID(device))) {
                                 RxCharacteristicReady = setRxCharacteristic(bluetoothGattCharacteristic);
                             }
                         }
                     }
-                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxServiceUUID())) {
+                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxServiceUUID(device))) {
                         for (BluetoothGattCharacteristic bluetoothGattCharacteristic : bluetoothGattService.getCharacteristics()) {
-                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxCharacteristicUUID())) {
+                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxCharacteristicUUID(device))) {
                                 TxCharacteristicReady = setTxCharacteristic(bluetoothGattCharacteristic);
                             }
                         }
@@ -155,13 +168,12 @@ public class BLEDevice extends BaseDevice {
     };
 
     /**
-     * Request a write on a given {@code BluetoothGattCharacteristic}. The read result is reported
-     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
-     * callback.
+     * 发送数据
      *
-     * @param characteristic The characteristic to read from.
+     * @param characteristic 待写特征
+     * @param value          待发送数据
      */
-    public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] value) {
+    private boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] value) {
         if (mBluetoothGatt == null) {
             LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized");
             return false;
@@ -172,13 +184,11 @@ public class BLEDevice extends BaseDevice {
     }
 
     /**
-     * Request a write on a given {@code BluetoothGattDescriptor}. The read result is reported
-     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
-     * callback.
+     * 写Descriptor
      *
-     * @param descriptor The descriptor to read from.
+     * @param descriptor 待写Descriptor
      */
-    public void writeDescriptor(BluetoothGattDescriptor descriptor) {
+    private void writeDescriptor(BluetoothGattDescriptor descriptor) {
         if (mBluetoothGatt == null) {
             LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized");
             return;
@@ -206,6 +216,12 @@ public class BLEDevice extends BaseDevice {
         receive(descriptor.getValue());
     }
 
+    /**
+     * 设置MTU
+     *
+     * @param mtu MTU大小
+     * @return 设置结果
+     */
     public boolean setMTU(int mtu) {
         if (null == mBluetoothGatt) {
             LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized.");
@@ -219,12 +235,12 @@ public class BLEDevice extends BaseDevice {
     }
 
     /**
-     * 设置Write Characteristic
+     * 设置写通道
      *
-     * @param bluetoothGattCharacteristic Write Characteristic
+     * @param bluetoothGattCharacteristic 写特征
      * @return 是为true，否为false
      */
-    public boolean setTxCharacteristic(BluetoothGattCharacteristic bluetoothGattCharacteristic) {
+    private boolean setTxCharacteristic(BluetoothGattCharacteristic bluetoothGattCharacteristic) {
         int properties = bluetoothGattCharacteristic.getProperties();
         if (((properties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0) || ((properties & BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) > 0)) {
             mTxCharacteristic = bluetoothGattCharacteristic;
@@ -234,12 +250,12 @@ public class BLEDevice extends BaseDevice {
     }
 
     /**
-     * 设置Notify Characteristic
+     * 设置读通道
      *
-     * @param bluetoothGattCharacteristic Write Characteristic
+     * @param bluetoothGattCharacteristic 读特征
      * @return 是为true，否为false
      */
-    public boolean setRxCharacteristic(BluetoothGattCharacteristic bluetoothGattCharacteristic) {
+    private boolean setRxCharacteristic(BluetoothGattCharacteristic bluetoothGattCharacteristic) {
         int properties = bluetoothGattCharacteristic.getProperties();
         if (((properties & BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) || ((properties & BluetoothGattCharacteristic.PROPERTY_INDICATE) > 0)) {
             mRxCharacteristic = bluetoothGattCharacteristic;
@@ -251,18 +267,18 @@ public class BLEDevice extends BaseDevice {
     /**
      * 清空上行下行通道
      */
-    public void clearTxRxCharacteristic() {
+    private void clearTxRxCharacteristic() {
         mTxCharacteristic = null;
         mRxCharacteristic = null;
     }
 
     /**
-     * Enables or disables notification or indicate on a give characteristic.
+     * 开启/关闭Notification
      *
-     * @param characteristic Characteristic to act on.
-     * @param enabled        If true, enable notification or indicate.  False otherwise.
+     * @param characteristic 待操作特征.
+     * @param enabled        true 开启; false 关闭
      */
-    public boolean setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
+    private boolean setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
         if (mBluetoothGatt == null) {
             LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized");
             return false;

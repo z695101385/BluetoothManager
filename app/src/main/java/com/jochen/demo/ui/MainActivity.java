@@ -27,6 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * 文件名：MainActivity
+ * 描述：主界面（设备管理）
+ * 1、搜索BLE、SPP设备
+ * 2、获取已连接设备
+ * 3、获取已绑定设备
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/1
+ */
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 

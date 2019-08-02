@@ -29,7 +29,7 @@ import java.util.TimerTask;
 public abstract class BluetoothManager {
     protected boolean isBLE = false;
     protected Context mContext;
-
+    // ConnectState不等于DISCONNECT的设备会在数组中
     public HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
     private BluetoothScanCallback bluetoothScanCallback = null;
     private Timer mScanTimer = new Timer();
@@ -54,9 +54,9 @@ public abstract class BluetoothManager {
 
     /**
      * 根据mac地址获取device的model
-     *
-     * @param address
-     * @return
+     * 若为已连接设备则返回连接设备Model，否则根据BluetoothDevice创建BLEDevice或SPPDevice
+     * @param address 设备mac地址
+     * @return BLEDevice or SPPDevice
      */
     public BaseDevice getDevice(String address) {
         BaseDevice baseDevice = connectedDevices.get(address);
@@ -85,6 +85,10 @@ public abstract class BluetoothManager {
      */
     protected abstract void stopScanFunction(BluetoothScanCallback callback);
 
+    /**
+     * 当前是否正在搜索
+     * @return bool
+     */
     public boolean isScanning() {
         return bluetoothScanCallback != null;
     }
@@ -156,7 +160,7 @@ public abstract class BluetoothManager {
         }
     }
 
-    protected String TAG() {
+    private String TAG() {
         return isBLE ? "BLEManager" : "SPPManager";
     }
 

@@ -1,5 +1,9 @@
 package com.jochen.bluetoothmanager.utils;
 
+import android.bluetooth.BluetoothDevice;
+
+import com.jochen.bluetoothmanager.base.BaseDevice;
+
 import java.util.UUID;
 
 /**
@@ -22,19 +26,19 @@ public class ConfigUtils {
         return UUID.fromString(DESCRIPTOR_CONFIG_UUID);
     }
 
-    public static String getRxServiceUUID() {
+    public static String getRxServiceUUID(BluetoothDevice device) {
         return SERVICE_RX_UUID;
     }
 
-    public static String getRxCharacteristicUUID() {
+    public static String getRxCharacteristicUUID(BluetoothDevice device) {
         return CHARACTERISTIC_RX_UUID;
     }
 
-    public static String getTxServiceUUID() {
+    public static String getTxServiceUUID(BluetoothDevice device) {
         return SERVICE_TX_UUID;
     }
 
-    public static String getTxCharacteristicUUID() {
+    public static String getTxCharacteristicUUID(BluetoothDevice device) {
         return CHARACTERISTIC_TX_UUID;
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -42,7 +46,7 @@ public class ConfigUtils {
     ///////////////////////////////////////////////////////////////////////////
     private static final String SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb";
 
-    public static UUID getRfcommUUID() {
+    public static UUID getRfcommUUID(BluetoothDevice device) {
         return UUID.fromString(SPP_UUID);
     }
 }

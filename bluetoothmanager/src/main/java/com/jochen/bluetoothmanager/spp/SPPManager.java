@@ -41,7 +41,11 @@ public class SPPManager extends BluetoothManager {
         Set<BluetoothDevice> deviceSet = BluetoothUtils.getBondedDevices();
         if (deviceSet != null) {
             for (BluetoothDevice device : deviceSet) {
-                bondedDevices.add(new SPPDevice(device));
+                if (connectedDevices.containsKey(device.getAddress())) {
+                    bondedDevices.add((SPPDevice) connectedDevices.get(device.getAddress()));
+                } else {
+                    bondedDevices.add(new SPPDevice(device));
+                }
             }
         }
         return bondedDevices;

@@ -15,7 +15,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * 文件名：SPPDevice
+ * 描述：封装了SPP链路的连接、通信方法
+ * 构造只需要传入系统的BluetoothDevice模型
+ * SPPDevice sppDevice = new SPPDevice(device);
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/2
+ */
 public class SPPDevice extends BaseDevice {
+    // 搜索到的设备额外信息
     public Bundle extras;
 
     public SPPDevice(BluetoothDevice device) {
@@ -41,14 +50,12 @@ public class SPPDevice extends BaseDevice {
 
     @Override
     public boolean write(byte[] data) {
-        // Create temporary object
         ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
+        //同步获取通信线程
         synchronized (this) {
             if (connectionState < ConnectState.STATE_CONNECTED) return false;
             r = mConnectedThread;
         }
-        // Perform the write unsynchronized
         r.write(data);
         return true;
     }
@@ -64,13 +71,13 @@ public class SPPDevice extends BaseDevice {
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     /**
-     * Start the ConnectedThread to begin managing a Bluetooth connection
+     * 连接成功后开启通信线程
      *
      * @param socket The BluetoothSocket on which the connection was made
      * @param device The BluetoothDevice that has been connected
      */
-    private synchronized void connected(BluetoothSocket socket, BluetoothDevice device, final String socketType) {
-        LogUtils.i("[" + device.getName() + "] connected, Socket Type:" + socketType);
+    private synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
+        LogUtils.i("[" + device.getName() + "] connected");
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
             mConnectThread.cancel();
@@ -84,12 +91,12 @@ public class SPPDevice extends BaseDevice {
         }
 
         // Start the thread to manage the connection and perform transmissions
-        mConnectedThread = new ConnectedThread(socket, socketType);
+        mConnectedThread = new ConnectedThread(socket);
         mConnectedThread.start();
     }
 
     /**
-     * 清空连接
+     * 清空连接相关线程，设置状态
      */
     private synchronized void clearConnection() {
         // Cancel any thread attempting to make a connection
@@ -108,7 +115,7 @@ public class SPPDevice extends BaseDevice {
     }
 
     /**
-     * Indicate that the connection attempt failed and notify the UI Activity.
+     * 连接失败
      */
     private synchronized void connectionFailed() {
         LogUtils.d("[" + device.getName() + "] connectionFailed");
@@ -116,7 +123,7 @@ public class SPPDevice extends BaseDevice {
     }
 
     /**
-     * Indicate that the connection was lost and notify the UI Activity.
+     * 连接丢失
      */
     private synchronized void connectionLost() {
         LogUtils.d("[" + device.getName() + "] connectionLost");
@@ -125,34 +132,29 @@ public class SPPDevice extends BaseDevice {
 
 
     /**
-     * This thread runs while attempting to make an outgoing connection
-     * with a device. It runs straight through; the connection either
-     * succeeds or fails.
+     * 连接线程
+     * 尝试与设备建立SPP连接
      */
     private class ConnectThread extends Thread {
         private BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
-        private String mSocketType;
 
-        public ConnectThread(BluetoothDevice device) {
+        ConnectThread(BluetoothDevice device) {
             mmDevice = device;
             BluetoothSocket tmp = null;
-            mSocketType = "Secure";
 
-            // Get a BluetoothSocket for a connection with the
-            // given BluetoothDevice
             try {
-                tmp = device.createRfcommSocketToServiceRecord(ConfigUtils.getRfcommUUID());
+                tmp = device.createRfcommSocketToServiceRecord(ConfigUtils.getRfcommUUID(device));
             } catch (IOException e) {
-                LogUtils.e("[" + device.getName() + "] Socket Type: " + mSocketType + " create() failed", e);
+                LogUtils.e("[" + device.getName() + "] rfcomm create() failed", e);
             }
             mmSocket = tmp;
             setConnectState(ConnectState.STATE_CONNECTING);
         }
 
         public void run() {
-            LogUtils.i("[" + device.getName() + "] BEGIN mConnectThread SocketType:" + mSocketType);
-            setName("ConnectThread" + mSocketType);
+            LogUtils.i("[" + device.getName() + "] BEGIN mConnectThread");
+            setName("ConnectThread");
 
             // Always cancel discovery because it will slow down a connection
             BluetoothUtils.getBluetoothAdapter().cancelDiscovery();
@@ -164,13 +166,13 @@ public class SPPDevice extends BaseDevice {
                 mmSocket.connect();
             } catch (Exception e) {
                 // Close the socket
-                LogUtils.e("[" + device.getName() + "] unable to connect() " + mSocketType + " socket during connection failure", e);
+                LogUtils.e("[" + device.getName() + "] unable to connect() socket during connection failure", e);
                 try {
                     if (mmSocket != null) {
                         mmSocket.close();
                     }
                 } catch (IOException e2) {
-                    LogUtils.e("[" + device.getName() + "] unable to close() " + mSocketType + " socket during connection failure", e2);
+                    LogUtils.e("[" + device.getName() + "] unable to close() socket during connection failure", e2);
                 }
                 connectionFailed();
                 return;
@@ -182,7 +184,7 @@ public class SPPDevice extends BaseDevice {
             }
 
             // Start the connected thread
-            connected(mmSocket, mmDevice, mSocketType);
+            connected(mmSocket, mmDevice);
         }
 
         void cancel() {
@@ -191,22 +193,22 @@ public class SPPDevice extends BaseDevice {
                     mmSocket.close();
                 }
             } catch (IOException e) {
-                LogUtils.e("[" + device.getName() + "] close() of connect " + mSocketType + " socket failed", e);
+                LogUtils.e("[" + device.getName() + "] close() of connect socket failed", e);
             }
         }
     }
 
     /**
-     * This thread runs during a connection with a remote device.
-     * It handles all incoming and outgoing transmissions.
+     * 通信线程
+     * 在SPP连接成功后，开启通信线程
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        ConnectedThread(BluetoothSocket socket, String socketType) {
-            LogUtils.d("[" + device.getName() + "] create ConnectedThread: " + socketType);
+        ConnectedThread(BluetoothSocket socket) {
+            LogUtils.d("[" + device.getName() + "] create ConnectedThread");
             setConnectState(ConnectState.STATE_CONNECTED);
             mmSocket = socket;
             InputStream tmpIn = null;
@@ -252,9 +254,9 @@ public class SPPDevice extends BaseDevice {
         }
 
         /**
-         * Write to the connected OutStream.
+         * 发送数据
          *
-         * @param buffer The bytes to write
+         * @param buffer 待发送数据
          */
         void write(byte[] buffer) {
             try {

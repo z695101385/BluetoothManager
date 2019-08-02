@@ -56,29 +56,28 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
 
     @Override
     public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+        if (!isScanning) {
+            return;
+        }
         if (devices.containsKey(device)) {
             BLEDevice bleDevice = (BLEDevice) devices.get(device);
             if (bleDevice != null) {
                 bleDevice.rssi = rssi;
                 bleDevice.scanRecord = scanRecord;
-                if (isScanning) {
-                    onRefreshDevice(bleDevice);
-                }
+                onRefreshDevice(bleDevice);
             }
         } else {
             BLEDevice bleDevice = new BLEDevice(device);
             bleDevice.rssi = rssi;
             bleDevice.scanRecord = scanRecord;
             devices.put(device, bleDevice);
-            if (isScanning) {
-                onScanDevice(bleDevice);
-            }
+            onScanDevice(bleDevice);
         }
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
+        if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction()) && isScanning) {
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (device != null) {
                 if (devices.containsKey(device)) {
@@ -89,9 +88,7 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
                             sppDevice.extras = extras;
                             sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
                         }
-                        if (isScanning) {
-                            onRefreshDevice(sppDevice);
-                        }
+                        onRefreshDevice(sppDevice);
                     }
                 } else {
                     SPPDevice sppDevice = new SPPDevice(device);
@@ -101,9 +98,7 @@ public abstract class BluetoothScanCallback extends BroadcastReceiver implements
                         sppDevice.rssi = extras.getShort(BluetoothDevice.EXTRA_RSSI);
                     }
                     devices.put(device, sppDevice);
-                    if (isScanning) {
-                        onScanDevice(sppDevice);
-                    }
+                    onScanDevice(sppDevice);
                 }
             }
         }

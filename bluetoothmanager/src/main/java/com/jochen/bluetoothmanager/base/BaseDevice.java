@@ -1,7 +1,6 @@
 package com.jochen.bluetoothmanager.base;
 
 import android.bluetooth.BluetoothDevice;
-import android.os.Parcelable;
 
 import com.jochen.bluetoothmanager.event.Event;
 import com.jochen.bluetoothmanager.event.EventCode;
@@ -21,14 +20,18 @@ import java.util.List;
  * 创建时间：2019/7/30
  */
 public abstract class BaseDevice {
-    public boolean isBLE = false;
+    // true BLE; false SPP
+    public boolean isBLE;
+    // 系统蓝牙Model
     public BluetoothDevice device;
+    // 信号强度
     public int rssi;
+    // 连接状态
     public int connectionState = ConnectState.STATE_DISCONNECTED;
-
+    // 接收数据回调
     private List<ReceiveDataCallback> receiveDataCallbackList = new ArrayList<>();
 
-    public BaseDevice(boolean isBLE, BluetoothDevice device) {
+    protected BaseDevice(boolean isBLE, BluetoothDevice device) {
         this.isBLE = isBLE;
         this.device = device;
     }

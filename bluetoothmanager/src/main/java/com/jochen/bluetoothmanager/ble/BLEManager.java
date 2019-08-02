@@ -4,6 +4,12 @@ import com.jochen.bluetoothmanager.base.BluetoothManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
 import com.jochen.bluetoothmanager.utils.BluetoothUtils;
 
+/**
+ * 文件名：BLEManager
+ * 描述：BLE管理类
+ * 创建人：jochen.zhang
+ * 创建时间：2019/8/1
+ */
 public class BLEManager extends BluetoothManager {
     @Override
     protected boolean startScanFunction(BluetoothScanCallback callback) {
