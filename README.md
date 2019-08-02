@@ -12,12 +12,12 @@ SPPManager.getInstance().init(this);
 BLEManager.getInstance().init(this);
 ```
 
-##Manager
+## Manager
 Manger主要负责设备搜索与管理
 BLEManager、SPPManager都继承于BluetoothManager
 使用BLEManager搜索到的设备就是BLE设备，SPPManager搜索到的设备就是传统蓝牙设备
 
-###BluetoothManager的属性与方法：
+### BluetoothManager的属性与方法：
 ```java
 // ConnectState不等于DISCONNECT的设备会在数组中
 public HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
@@ -36,7 +36,7 @@ public boolean startScan(BluetoothScanCallback callback)
 public void cancelScan()
 ```
 
-###SPPManager独有方法:
+### SPPManager独有方法:
 ```java
 /**
  * 获取已绑定设备
@@ -45,7 +45,7 @@ public void cancelScan()
  */
 public List<SPPDevice> getBondedDevices()
 ```
-###示例
+### 示例
 ```java
 BLEManager.getInstance().startScan(new BluetoothScanCallback(5000) {
     @Override
@@ -65,12 +65,12 @@ BLEManager.getInstance().startScan(new BluetoothScanCallback(5000) {
 BLEManager.getInstance().cancelScan();
 ```
 
-##Device
+## Device
 Device负责建立链路以及数据通信（可以不依靠Manager单独使用）
 BLEDevice、SPPDevice都继承于BaseDevice
 只需要构造方法中传入系统BluetoothDevice作为参数
 
-###BaseDevice中的属性与方法:
+### BaseDevice中的属性与方法:
 ```java
 /**
  * 建立连接
@@ -106,7 +106,7 @@ public boolean unregisterReceiveDataCallback(ReceiveDataCallback callback) {
 }
 ```
 
-###示例
+### 示例
 ```java
 // 连接
 BLEDevice device = new BLEDevice(device);
