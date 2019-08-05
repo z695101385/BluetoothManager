@@ -3,11 +3,13 @@ package com.jochen.bluetoothmanager.spp;
 import android.bluetooth.BluetoothDevice;
 import android.content.IntentFilter;
 
+import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.base.BluetoothManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
 import com.jochen.bluetoothmanager.utils.BluetoothUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -40,9 +42,10 @@ public class SPPManager extends BluetoothManager {
         List<SPPDevice> bondedDevices = new ArrayList<>();
         Set<BluetoothDevice> deviceSet = BluetoothUtils.getBondedDevices();
         if (deviceSet != null) {
+            HashMap<String, BaseDevice> devices = getConnectedDevices();
             for (BluetoothDevice device : deviceSet) {
-                if (connectedDevices.containsKey(device.getAddress())) {
-                    bondedDevices.add((SPPDevice) connectedDevices.get(device.getAddress()));
+                if (devices.containsKey(device.getAddress())) {
+                    bondedDevices.add((SPPDevice) devices.get(device.getAddress()));
                 } else {
                     bondedDevices.add(new SPPDevice(device));
                 }

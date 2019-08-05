@@ -48,7 +48,8 @@ public class BLEDevice extends BaseDevice {
     public void disconnect() {
         if (mBluetoothGatt != null) {
             mBluetoothGatt.disconnect();
-            // 若
+            // 若刚连接就断开，系统不会回调Disconnect，导致无法更新ConnectState
+            // 添加断连操作后关闭GATT操作
             mBluetoothGatt.close();
             mBluetoothGatt = null;
             setConnectState(ConnectState.STATE_DISCONNECTED);
@@ -63,6 +64,24 @@ public class BLEDevice extends BaseDevice {
             return false;
         }
         return writeCharacteristic(mTxCharacteristic, data);
+    }
+
+    /**
+     * 设置MTU
+     *
+     * @param mtu MTU大小
+     * @return 设置结果
+     */
+    public boolean setMTU(int mtu) {
+        if (null == mBluetoothGatt) {
+            LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized.");
+            return false;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return mBluetoothGatt.requestMtu(mtu);
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -214,24 +233,6 @@ public class BLEDevice extends BaseDevice {
     private void receiveData(final BluetoothGattDescriptor descriptor) {
         LogUtils.d("[" + device.getName() + "] 接收 长度: " + descriptor.getValue().length + " 数据: " + ProtocolUtils.bytesToHexStr(descriptor.getValue()));
         receive(descriptor.getValue());
-    }
-
-    /**
-     * 设置MTU
-     *
-     * @param mtu MTU大小
-     * @return 设置结果
-     */
-    public boolean setMTU(int mtu) {
-        if (null == mBluetoothGatt) {
-            LogUtils.w("[" + device.getName() + "] mBluetoothGatt not initialized.");
-            return false;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return mBluetoothGatt.requestMtu(mtu);
-        } else {
-            return false;
-        }
     }
 
     /**

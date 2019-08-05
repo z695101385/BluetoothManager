@@ -2,10 +2,12 @@ package com.jochen.bluetoothmanager.base;
 
 import android.bluetooth.BluetoothDevice;
 
+import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.event.Event;
 import com.jochen.bluetoothmanager.event.EventCode;
 import com.jochen.bluetoothmanager.function.ConnectState;
 import com.jochen.bluetoothmanager.function.ReceiveDataCallback;
+import com.jochen.bluetoothmanager.spp.SPPManager;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -45,17 +47,27 @@ public abstract class BaseDevice {
         if (state != connectionState) {
             LogUtils.i("[" + device.getName() + "] 连接状态 " + connectionState + " -> " + state);
             connectionState = state;
-            EventBus.getDefault().post(new Event<>(EventCode.ConnectionStateChangedCode, this));
             switch (state) {
                 case ConnectState.STATE_DISCONNECTED:
+                    if (isBLE) {
+                        BLEManager.getInstance().removeConnectedDevice(this);
+                    } else {
+                        SPPManager.getInstance().removeConnectedDevice(this);
+                    }
                     break;
                 case ConnectState.STATE_CONNECTING:
+                    if (isBLE) {
+                        BLEManager.getInstance().putConnectedDevice(this);
+                    } else {
+                        SPPManager.getInstance().putConnectedDevice(this);
+                    }
                     break;
                 case ConnectState.STATE_CONNECTED:
                     break;
                 case ConnectState.STATE_DATA_READY:
                     break;
             }
+            EventBus.getDefault().post(new Event<>(EventCode.ConnectionStateChangedCode, this));
         }
     }
 

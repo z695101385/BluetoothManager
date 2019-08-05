@@ -4,17 +4,10 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 
 import com.jochen.bluetoothmanager.ble.BLEDevice;
-import com.jochen.bluetoothmanager.event.Event;
-import com.jochen.bluetoothmanager.event.EventCode;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
-import com.jochen.bluetoothmanager.function.ConnectState;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
 import com.jochen.bluetoothmanager.utils.BluetoothUtils;
 import com.jochen.bluetoothmanager.utils.LogUtils;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.HashMap;
 import java.util.Timer;
@@ -30,7 +23,7 @@ public abstract class BluetoothManager {
     protected boolean isBLE = false;
     protected Context mContext;
     // ConnectState不等于DISCONNECT的设备会在数组中
-    public HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
+    private final HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
     private BluetoothScanCallback bluetoothScanCallback = null;
     private Timer mScanTimer = new Timer();
     private TimerTask mScanTimerTask;
@@ -38,18 +31,40 @@ public abstract class BluetoothManager {
     public void init(Context context) {
         deInit();
         mContext = context.getApplicationContext();
-        EventBus.getDefault().register(this);
     }
 
     public void deInit() {
         if (mContext != null) {
             mContext = null;
         }
-        EventBus.getDefault().unregister(this);
     }
 
     public Context getContext() {
         return mContext;
+    }
+
+    public HashMap<String, BaseDevice> getConnectedDevices() {
+        synchronized (connectedDevices) {
+            return connectedDevices;
+        }
+    }
+
+    public void putConnectedDevice(BaseDevice device) {
+        synchronized (connectedDevices) {
+            connectedDevices.put(device.device.getAddress(), device);
+        }
+    }
+
+    public void removeConnectedDevice(BaseDevice device) {
+        synchronized (connectedDevices) {
+            connectedDevices.remove(device.device.getAddress());
+        }
+    }
+
+    public BaseDevice getConnectedDevice(String address) {
+        synchronized (connectedDevices) {
+            return connectedDevices.get(address);
+        }
     }
 
     /**
@@ -59,7 +74,7 @@ public abstract class BluetoothManager {
      * @return BLEDevice or SPPDevice
      */
     public BaseDevice getDevice(String address) {
-        BaseDevice baseDevice = connectedDevices.get(address);
+        BaseDevice baseDevice = getConnectedDevice(address);
         if (baseDevice != null) {
             return baseDevice;
         }
@@ -162,32 +177,5 @@ public abstract class BluetoothManager {
 
     private String TAG() {
         return isBLE ? "BLEManager" : "SPPManager";
-    }
-
-    /**
-     * 监听EventBus消息
-     *
-     * @param event 接收到的event
-     */
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(Event event) {
-        switch (event.getCode()) {
-            case EventCode.ConnectionStateChangedCode:
-                BaseDevice device = (BaseDevice) event.getData();
-                if (device.isBLE == isBLE) {
-                    // 对应类型
-                    switch (device.connectionState) {
-                        case ConnectState.STATE_DISCONNECTED:
-                            connectedDevices.remove(device.device.getAddress());
-                            LogUtils.i("[" + TAG() + "] connectedDevices " + connectedDevices.size());
-                            break;
-                        case ConnectState.STATE_CONNECTING:
-                            connectedDevices.put(device.device.getAddress(), device);
-                            LogUtils.i("[" + TAG() + "] connectedDevices " + connectedDevices.size());
-                            break;
-                    }
-                }
-                break;
-        }
     }
 }

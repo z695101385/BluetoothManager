@@ -24,6 +24,7 @@ import com.jochen.demo.adapter.DeviceAdapter;
 import com.jochen.demo.item.DeviceItem;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -157,10 +158,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 stopScan();
                 deviceItems.clear();
-                for (BaseDevice device : BLEManager.getInstance().connectedDevices.values()) {
+                Collection<BaseDevice> bleDevices = BLEManager.getInstance().getConnectedDevices().values();
+                for (BaseDevice device : bleDevices) {
                     deviceItems.add(new DeviceItem(DeviceItem.TYPE_NORMAL, device));
                 }
-                for (BaseDevice device : SPPManager.getInstance().connectedDevices.values()) {
+
+                Collection<BaseDevice> sppDevices = SPPManager.getInstance().getConnectedDevices().values();
+                for (BaseDevice device : sppDevices) {
                     deviceItems.add(new DeviceItem(DeviceItem.TYPE_NORMAL, device));
                 }
                 refreshList();

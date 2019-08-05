@@ -262,7 +262,7 @@ public class SPPDevice extends BaseDevice {
             try {
                 LogUtils.d("[" + device.getName() + "] 发送 长度: " + buffer.length + " 数据: " + ProtocolUtils.bytesToHexStr(buffer));
                 mmOutStream.write(buffer);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LogUtils.e("[" + device.getName() + "] Exception during write");
             }
         }

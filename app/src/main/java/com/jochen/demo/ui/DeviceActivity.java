@@ -149,8 +149,12 @@ public class DeviceActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     BLEDevice bleDevice = (BLEDevice) device;
-                    int mtu = Integer.parseInt(mMTUEditText.getText().toString());
-                    bleDevice.setMTU(mtu);
+                    try {
+                        int mtu = Integer.parseInt(mMTUEditText.getText().toString());
+                        bleDevice.setMTU(mtu);
+                    } catch (NumberFormatException e) {
+                        LogUtils.e("MTU输入异常");
+                    }
                 }
             });
         } else {
@@ -260,8 +264,10 @@ public class DeviceActivity extends AppCompatActivity {
         String command = mCommandEditText.getText().toString();
         mCommandEditText.getText().clear();
         byte[] data = ProtocolUtils.hexStrToBytes(command);
-        addMessage(true, command);
-        device.write(data);
+        if (data != null) {
+            addMessage(true, ProtocolUtils.bytesToHexStr(ProtocolUtils.hexStrToBytes(command)));
+            device.write(data);
+        }
     }
 
     /**
