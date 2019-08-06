@@ -20,13 +20,22 @@ import java.util.TimerTask;
  * 创建时间：2019/7/26
  */
 public abstract class BluetoothManager {
+    // true BLEManager; false SPPManager
     protected boolean isBLE = false;
+    // 上下文
     protected Context mContext;
     // ConnectState不等于DISCONNECT的设备会在数组中
     private final HashMap<String, BaseDevice> connectedDevices = new HashMap<>();
+    // 蓝牙搜索回调
     private BluetoothScanCallback bluetoothScanCallback = null;
+    // 蓝牙搜索Timer
     private Timer mScanTimer = new Timer();
+    // 蓝牙搜索超时task
     private TimerTask mScanTimerTask;
+
+    private String TAG() {
+        return isBLE ? "BLEManager" : "SPPManager";
+    }
 
     public void init(Context context) {
         deInit();
@@ -34,33 +43,52 @@ public abstract class BluetoothManager {
     }
 
     public void deInit() {
-        if (mContext != null) {
-            mContext = null;
-        }
+        mContext = null;
     }
 
     public Context getContext() {
         return mContext;
     }
 
+    /**
+     * 获取连接设备Map
+     *
+     * @return HashMap <mac, BLEDevice or SPPDevice>
+     */
     public HashMap<String, BaseDevice> getConnectedDevices() {
         synchronized (connectedDevices) {
             return connectedDevices;
         }
     }
 
+    /**
+     * 设备连接时将自身加入已连接数组中
+     *
+     * @param device BLEDevice or SPPDevice
+     */
     public void putConnectedDevice(BaseDevice device) {
         synchronized (connectedDevices) {
             connectedDevices.put(device.device.getAddress(), device);
         }
     }
 
+    /**
+     * 设备断开连接时将自身从已连接数组中移除
+     *
+     * @param device BLEDevice or SPPDevice
+     */
     public void removeConnectedDevice(BaseDevice device) {
         synchronized (connectedDevices) {
             connectedDevices.remove(device.device.getAddress());
         }
     }
 
+    /**
+     * 获取已连接设备
+     *
+     * @param address 设备mac地址
+     * @return BLEDevice or SPPDevice
+     */
     public BaseDevice getConnectedDevice(String address) {
         synchronized (connectedDevices) {
             return connectedDevices.get(address);
@@ -173,9 +201,5 @@ public abstract class BluetoothManager {
             stopScan();
             LogUtils.d("[" + TAG() + "] 搜索取消");
         }
-    }
-
-    private String TAG() {
-        return isBLE ? "BLEManager" : "SPPManager";
     }
 }

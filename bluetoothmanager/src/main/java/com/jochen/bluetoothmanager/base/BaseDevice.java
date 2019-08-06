@@ -7,6 +7,7 @@ import com.jochen.bluetoothmanager.event.Event;
 import com.jochen.bluetoothmanager.event.EventCode;
 import com.jochen.bluetoothmanager.function.ConnectState;
 import com.jochen.bluetoothmanager.function.ReceiveDataCallback;
+import com.jochen.bluetoothmanager.function.UUIDConfig;
 import com.jochen.bluetoothmanager.spp.SPPManager;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 
@@ -30,12 +31,27 @@ public abstract class BaseDevice {
     public int rssi;
     // 连接状态
     public int connectionState = ConnectState.STATE_DISCONNECTED;
+    // UUID配置
+    protected UUIDConfig mUUIDConfig;
     // 接收数据回调
     private List<ReceiveDataCallback> receiveDataCallbackList = new ArrayList<>();
 
-    protected BaseDevice(boolean isBLE, BluetoothDevice device) {
+    protected BaseDevice(boolean isBLE, BluetoothDevice device, UUIDConfig uuidConfig) {
         this.isBLE = isBLE;
         this.device = device;
+        mUUIDConfig = uuidConfig;
+    }
+
+    /**
+     * 设置UUID配置信息
+     * 设备连接前必须配置UUIDConfig
+     * SPPDevice初始化时若未配置UUIDConfig，则默认使用SPP链路UUID
+     * BLEDevice必须手动配置UUIDConfig，否则无法连接设备
+     *
+     * @param uuidConfig UUID配置信息
+     */
+    public void setUUIDConfig(UUIDConfig uuidConfig) {
+        mUUIDConfig = uuidConfig;
     }
 
     /**

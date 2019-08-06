@@ -10,7 +10,7 @@ import android.bluetooth.BluetoothProfile;
 import android.os.Build;
 
 import com.jochen.bluetoothmanager.base.BaseDevice;
-import com.jochen.bluetoothmanager.utils.ConfigUtils;
+import com.jochen.bluetoothmanager.function.UUIDConfig;
 import com.jochen.bluetoothmanager.function.ConnectState;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 import com.jochen.bluetoothmanager.utils.ProtocolUtils;
@@ -28,12 +28,32 @@ import java.util.List;
 public class BLEDevice extends BaseDevice {
     public byte[] scanRecord;
 
+    /**
+     * 搜索到设备时会调用此构造方法
+     * 此时BLEDevice未配置UUID，连接前需要先配置UUID
+     *
+     * @param device BluetoothDevice
+     */
     public BLEDevice(BluetoothDevice device) {
-        super(true, device);
+        super(true, device, null);
+    }
+
+    /**
+     * BLEDevice构造函数
+     *
+     * @param device BluetoothDevice
+     * @param uuidConfig 连接配置的UUID
+     */
+    public BLEDevice(BluetoothDevice device, UUIDConfig uuidConfig) {
+        super(true, device, uuidConfig);
     }
 
     @Override
     public boolean connect() {
+        if (mUUIDConfig == null) {
+            LogUtils.e("连接设备前请先配置UUID(setUUIDConfig)");
+            return false;
+        }
         if (connectionState == ConnectState.STATE_DISCONNECTED) {
             // We want to directly connect to the device, so we are setting the autoConnect
             // parameter to false.
@@ -119,16 +139,16 @@ public class BLEDevice extends BaseDevice {
                 boolean RxCharacteristicReady = false;
                 boolean TxCharacteristicReady = false;
                 for (BluetoothGattService bluetoothGattService : bluetoothGattServices) {
-                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxServiceUUID(device))) {
+                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(mUUIDConfig.getRxServiceUUID())) {
                         for (BluetoothGattCharacteristic bluetoothGattCharacteristic : bluetoothGattService.getCharacteristics()) {
-                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getRxCharacteristicUUID(device))) {
+                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(mUUIDConfig.getRxCharacteristicUUID())) {
                                 RxCharacteristicReady = setRxCharacteristic(bluetoothGattCharacteristic);
                             }
                         }
                     }
-                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxServiceUUID(device))) {
+                    if (bluetoothGattService.getUuid().toString().equalsIgnoreCase(mUUIDConfig.getTxServiceUUID())) {
                         for (BluetoothGattCharacteristic bluetoothGattCharacteristic : bluetoothGattService.getCharacteristics()) {
-                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(ConfigUtils.getTxCharacteristicUUID(device))) {
+                            if (bluetoothGattCharacteristic.getUuid().toString().equalsIgnoreCase(mUUIDConfig.getTxCharacteristicUUID())) {
                                 TxCharacteristicReady = setTxCharacteristic(bluetoothGattCharacteristic);
                             }
                         }
@@ -291,7 +311,7 @@ public class BLEDevice extends BaseDevice {
             if (characteristic.getDescriptors() != null && characteristic.getDescriptors().size() == 1) {
                 bluetoothGattDescriptor = characteristic.getDescriptors().get(0);
             } else {
-                bluetoothGattDescriptor = characteristic.getDescriptor(ConfigUtils.getDescriptorConfigUUID());
+                bluetoothGattDescriptor = characteristic.getDescriptor(UUIDConfig.getDescriptorConfigUUID());
             }
 
             if (bluetoothGattDescriptor != null) {

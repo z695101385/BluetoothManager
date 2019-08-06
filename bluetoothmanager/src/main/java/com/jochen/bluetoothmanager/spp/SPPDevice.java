@@ -6,8 +6,8 @@ import android.os.Bundle;
 
 import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.function.ConnectState;
+import com.jochen.bluetoothmanager.function.UUIDConfig;
 import com.jochen.bluetoothmanager.utils.BluetoothUtils;
-import com.jochen.bluetoothmanager.utils.ConfigUtils;
 import com.jochen.bluetoothmanager.utils.LogUtils;
 import com.jochen.bluetoothmanager.utils.ProtocolUtils;
 
@@ -27,12 +27,31 @@ public class SPPDevice extends BaseDevice {
     // 搜索到的设备额外信息
     public Bundle extras;
 
+    /**
+     * 不传入UUIDConfig构造时使用默认的SPP UUID
+     *
+     * @param device BluetoothDevice
+     */
     public SPPDevice(BluetoothDevice device) {
-        super(false, device);
+        super(false, device, UUIDConfig.getSppConfig());
+    }
+
+    /**
+     * SPPDevice构造函数
+     *
+     * @param device BluetoothDevice
+     * @param uuidConfig 连接配置的UUID
+     */
+    public SPPDevice(BluetoothDevice device, UUIDConfig uuidConfig) {
+        super(false, device, uuidConfig);
     }
 
     @Override
     public boolean connect() {
+        if (mUUIDConfig == null) {
+            LogUtils.e("连接设备前请先配置UUID(setUUIDConfig)");
+            return false;
+        }
         if (connectionState == ConnectState.STATE_DISCONNECTED) {
             // Start the thread to connect with the given device
             mConnectThread = new ConnectThread(device);
@@ -144,7 +163,7 @@ public class SPPDevice extends BaseDevice {
             BluetoothSocket tmp = null;
 
             try {
-                tmp = device.createRfcommSocketToServiceRecord(ConfigUtils.getRfcommUUID(device));
+                tmp = device.createRfcommSocketToServiceRecord(mUUIDConfig.getRfcommUUID());
             } catch (IOException e) {
                 LogUtils.e("[" + device.getName() + "] rfcomm create() failed", e);
             }

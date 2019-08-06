@@ -264,9 +264,8 @@ public class DeviceActivity extends AppCompatActivity {
         String command = mCommandEditText.getText().toString();
         mCommandEditText.getText().clear();
         byte[] data = ProtocolUtils.hexStrToBytes(command);
-        if (data != null) {
-            addMessage(true, ProtocolUtils.bytesToHexStr(ProtocolUtils.hexStrToBytes(command)));
-            device.write(data);
+        if (data != null && device.write(data)) {
+            addMessage(true, ProtocolUtils.bytesToHexStr(data));
         }
     }
 

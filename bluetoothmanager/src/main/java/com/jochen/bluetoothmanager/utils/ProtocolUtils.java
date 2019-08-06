@@ -1,8 +1,6 @@
 package com.jochen.bluetoothmanager.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 文件名：ProtocolUtils
@@ -48,148 +46,6 @@ public class ProtocolUtils {
     }
 
     /**
-     * 将int类型转成协议用的1 oct字符串
-     *
-     * @param b int值
-     * @return 字符串
-     */
-    public static String numToHex8(int b) {
-        String result = String.format("%02x", b);
-        if (result.length() > 2) {
-            return result.substring(result.length() - 2);
-        } else {
-            return result;
-        }
-    }
-
-    /**
-     * 将int类型转成协议用的2 oct字符串
-     *
-     * @param s int值
-     * @return 字符串
-     */
-    public static String numToHex16(int s) {
-        String result = String.format("%04x", s);
-        if (result.length() > 4) {
-            return result.substring(result.length() - 4);
-        } else {
-            return result;
-        }
-    }
-
-    /**
-     * 将long类型转成协议用的4 oct字符串
-     *
-     * @param i 值
-     * @return 字符串
-     */
-    public static String numToHex32(long i) {
-        String result = String.format("%08x", i);
-        if (result.length() > 8) {
-            return result.substring(result.length() - 8);
-        } else {
-            return result;
-        }
-    }
-
-    /**
-     * 浮点转换为字节
-     *
-     * @param f
-     * @return
-     */
-    public static byte[] float2byte(float f) {
-
-        // 把float转换为byte[]
-        int fbit = Float.floatToIntBits(f);
-
-        byte[] b = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            b[i] = (byte) (fbit >> (24 - i * 8));
-        }
-
-        return b;
-    }
-
-    /**
-     * 字节（4个字节）转换为浮点 ，保留1位小数，大端
-     *
-     * @param b1
-     * @param b2
-     * @param b3
-     * @param b4
-     * @return
-     */
-    public static float byte2float(byte b1, byte b2, byte b3, byte b4) {
-        int l;
-        l = b4;
-        l &= 0xff;
-        l |= ((long) b3 << 8);
-        l &= 0xffff;
-        l |= ((long) b2 << 16);
-        l &= 0xffffff;
-        l |= ((long) b1 << 24);
-        return Math.round(Float.intBitsToFloat(l) * 10) / 10f;
-    }
-
-    /**
-     * 合并4个字节为int类型
-     *
-     * @param high_h 最高位byte
-     * @param high_l 第二位byte
-     * @param low_h  第三位byte
-     * @param low_l  最低位byte
-     * @return 合并的int
-     */
-    public static int getIntFromBytes(byte high_h, byte high_l, byte low_h, byte low_l) {
-        return (high_h & 0xff) << 24 | (high_l & 0xff) << 16 | (low_h & 0xff) << 8 | low_l & 0xff;
-    }
-
-    /**
-     * 合并2个byte为short类型
-     *
-     * @param high 高位byte
-     * @param low  低位byte
-     * @return short结果
-     */
-    public static short getShortFromBytes(byte high, byte low) {
-        return (short) ((high & 0xff) << 8 | (low & 0xff));
-    }
-
-    /**
-     * 合并2个byte为uint类型
-     *
-     * @param high 高位byte
-     * @param low  低位byte
-     * @return int结果
-     */
-    public static int getUIntFromBytes(byte high, byte low) {
-        return (high & 0xff) << 8 | (low & 0xff);
-    }
-
-    /**
-     * 合并2个byte为int类型
-     *
-     * @param high 高位byte(第一位为符号)
-     * @param low  低位byte
-     * @return int结果
-     */
-    public static int getIntFromBytes(byte high, byte low) {
-        //return ((high & 0x80) > 0 ? -1 : 1) * ((high & 0x7f) << 8 | (low & 0xff));
-        return getShortFromBytes(high, low);
-    }
-
-    public static byte[] getBytesFromInt(int data){
-        byte[] result = new byte[4];
-        result[3] = (byte) (data & 0x000000ff);
-        result[2] = (byte) ((data & 0x0000ff00) >> 8);
-        result[1] = (byte) ((data & 0x00ff0000) >> 16);
-        result[0] = (byte) ((data & 0xff000000) >> 24);
-
-        return result;
-    }
-
-    /**
      * byte数组转成小写字符串
      *
      * @param bytes byte数组
@@ -217,17 +73,6 @@ public class ProtocolUtils {
             } else {
                 s.append(String.format("%02x", bytes[i]));
             }
-        }
-        return s.toString();
-    }
-
-    public static String bytesToHexStrWithSpace(byte[] bytes) {
-        if (null == bytes || bytes.length <= 0) {
-            return null;
-        }
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            s.append(String.format("%02X ", bytes[i]));
         }
         return s.toString();
     }
@@ -292,19 +137,5 @@ public class ProtocolUtils {
         byte[] b1 = new byte[length];
         System.arraycopy(b, off, b1, 0, length);
         return b1;
-    }
-
-    public static String bytesToMac(byte[] bytes) {
-        if (bytes.length == 6) {
-            StringBuilder mac_builder = new StringBuilder();
-            for (int i = 0; i < 5; i++) {
-                mac_builder.append(String.format("%02x", bytes[i]));
-                mac_builder.append(":");
-            }
-            mac_builder.append(String.format("%02x", bytes[5]));
-            return mac_builder.toString();
-        } else {
-            return "";
-        }
     }
 }

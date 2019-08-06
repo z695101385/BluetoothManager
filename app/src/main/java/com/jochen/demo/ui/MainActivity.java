@@ -16,6 +16,7 @@ import android.widget.Button;
 import com.jochen.bluetoothmanager.base.BaseDevice;
 import com.jochen.bluetoothmanager.ble.BLEManager;
 import com.jochen.bluetoothmanager.function.BluetoothScanCallback;
+import com.jochen.bluetoothmanager.function.UUIDConfig;
 import com.jochen.bluetoothmanager.spp.SPPDevice;
 import com.jochen.bluetoothmanager.spp.SPPManager;
 import com.jochen.bluetoothmanager.utils.LogUtils;
@@ -39,6 +40,10 @@ import java.util.Locale;
  */
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private static final String SERVICE_RX_UUID = "00000205-0000-1000-8000-00805F9B34FC";
+    private static final String SERVICE_TX_UUID = "00000205-0000-1000-8000-00805F9B34FC";
+    private static final String CHARACTERISTIC_RX_UUID = "00000207-0000-1000-8000-00805F9B34FC";
+    private static final String CHARACTERISTIC_TX_UUID = "00000208-0000-1000-8000-00805F9B34FC";
 
     private List<DeviceItem> deviceItems = new ArrayList<>();
     private DeviceAdapter mDeviceAdapter;
@@ -84,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onScanDevice(BaseDevice device) {
                         LogUtils.i(TAG, device.toString());
+                        UUIDConfig uuidConfig = new UUIDConfig(SERVICE_RX_UUID, CHARACTERISTIC_RX_UUID, SERVICE_TX_UUID, CHARACTERISTIC_TX_UUID);
+                        device.setUUIDConfig(uuidConfig);
                         deviceItems.add(new DeviceItem(DeviceItem.TYPE_NORMAL, device));
                         refreshList();
                     }

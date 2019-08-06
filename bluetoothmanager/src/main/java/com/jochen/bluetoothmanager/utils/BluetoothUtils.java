@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -217,7 +218,7 @@ public class BluetoothUtils {
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if(profile == BluetoothProfile.A2DP){
-                mBluetoothA2dp = (BluetoothA2dp) proxy; //转换
+                mBluetoothA2dp = (BluetoothA2dp) proxy;
             } else if (profile == BluetoothProfile.HEADSET) {
                 mBluetoothHeadset = (BluetoothHeadset) proxy;
             }
@@ -244,6 +245,20 @@ public class BluetoothUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取已连接的A2DP设备
+     *
+     * @param context 上下文
+     * @return List<BluetoothDevice>
+     */
+    public static List<BluetoothDevice> getConnectedA2DPDevice(Context context) {
+        if (mBluetoothA2dp == null) {
+            init(context);
+            return null;
+        }
+        return mBluetoothA2dp.getConnectedDevices();
     }
 
     /**
@@ -306,6 +321,20 @@ public class BluetoothUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取已连接的HFP设备
+     *
+     * @param context 上下文
+     * @return List<BluetoothDevice>
+     */
+    public static List<BluetoothDevice> getConnectedHFPDevice(Context context) {
+        if (mBluetoothHeadset == null) {
+            init(context);
+            return null;
+        }
+        return mBluetoothHeadset.getConnectedDevices();
     }
 
     /**
